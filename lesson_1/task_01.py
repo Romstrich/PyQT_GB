@@ -17,18 +17,18 @@ def host_ping(addr_list):
     adr_set=set(addr_list)
     for addr in adr_set:
 
-        try:
-            apv4=ipaddress.ip_address(addr)
-        except ValueError as err:
-            print(f'{addr} ---- Не IP адрес')
-            continue
+        # try:
+        #     apv4=ipaddress.ip_address(addr)
+        # except ValueError as err:
+        #     print(f'{addr} ---- Не IP адрес')
+        #     continue
+        # else:
+        proc=subprocess.Popen(["ping",addr, "-c", "1"],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
+        #out=proc.stdout.read().decode('utf-8')
+        if proc.wait()==0:
+            print(f'{addr} ---- Доступно')
         else:
-            proc=subprocess.Popen(["ping",addr, "-c", "1"],stdout=subprocess.PIPE,stderr=subprocess.STDOUT)
-            #out=proc.stdout.read().decode('utf-8')
-            if proc.wait()==0:
-                print(f'{addr} ---- Доступно')
-            else:
-                print(f'{addr} ---- Не доступно')
+            print(f'{addr} ---- Не доступно')
 
 
 host_ping(al)
