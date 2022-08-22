@@ -17,7 +17,7 @@ class ClientVerifier(type):
     '''Выполняем проверку при создании
         по этому используем перегрузку init'''
     def __init__(self, clsname, bases, clsdict):
-        print('Сейчас как проинициализируюсь!')
+        #print('Сейчас как проинициализируюсь!')
         #print(f'{clsname}\n{clsdict},\n{bases}')
         # интересующие нас команды, инструкции которых не должно быть:
         commands=('accept', 'listen', 'socket')
@@ -45,3 +45,14 @@ class ClientVerifier(type):
                 #print('АХТУНГ')
             else:
                 pass
+
+
+'''
+2. Реализовать метакласс ServerVerifier, выполняющий базовую проверку класса «Сервер»:
+отсутствие вызовов connect для сокетов;
+использование сокетов для работы по TCP. ###
+'''
+
+class ServerVerifier(type):
+    def __init__(self, clsname, bases, clsdict):
+        print('Сейчас как проинициализируюсь!')
