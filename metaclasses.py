@@ -25,4 +25,12 @@ class ClientVerifier(type):
         found_commands=[]
         #проверим функции в методах классса
         for i in clsdict:
-            print(dis.get_instructions(clsdict[i]))
+            try:
+                dis_iter=dis.get_instructions(clsdict[i])
+            except BaseException:
+                #Это нам не интересно
+                print('Не функция')
+            else:
+                print("шалость удалась")
+                for i in dis_iter:
+                    print(i)
