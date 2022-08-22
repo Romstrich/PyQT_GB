@@ -40,6 +40,8 @@ class ClientVerifier(type):
         #print(found_commands)
         for i in found_commands:
             if i in commands:
-                print('АХТУНГ')
+                #Нашлись неразрешённые команды
+                raise TypeError(f'Метод {i} запрещён к использованию в классе')
+                #print('АХТУНГ')
             else:
                 pass
