@@ -10,8 +10,8 @@ from errors import IncorrectDataRecivedError
 from common.variables import *
 from common.utils import *
 from decos import log
-from descrptrs import Port
-from metaclasses import ServerMaker
+# from descrptrs import Port
+# from metaclasses import ServerMaker
 
 # Инициализация логирования сервера.
 logger = logging.getLogger('server')
@@ -29,8 +29,8 @@ def arg_parser():
     return listen_address, listen_port
 
 # Основной класс сервера
-class Server(metaclass=ServerMaker):
-    port = Port()
+class Server():#metaclass=ServerMaker):
+    #port = Port()
 
     def __init__(self, listen_address, listen_port):
         # Параментры подключения

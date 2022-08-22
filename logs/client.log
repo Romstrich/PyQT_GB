@@ -59,3 +59,23 @@ hi
 2019-06-20 13:22:39,376 CRITICAL client.py Попытка запуска клиента с неподходящим номером порта: 70000. Допустимы адреса с 1024 до 65535. Клиент завершается.
 2019-06-20 13:23:47,462 DEBUG decos.py Была вызвана функция arg_parser c параметрами () , {}. Вызов из модуля __main__
 2019-06-20 13:23:47,463 CRITICAL client.py Попытка запуска клиента с неподходящим номером порта: 70000. Допустимы адреса с 1024 до 65535. Клиент завершается.
+2022-08-22 13:07:33,705 DEBUG decos.py Была вызвана функция arg_parser c параметрами () , {}. Вызов из модуля __main__
+2022-08-22 13:07:33,715 CRITICAL client.py Попытка запуска клиента с неподходящим номером порта: 70000. Допустимы адреса с 1024 до 65535. Клиент завершается.
+2022-08-22 13:08:14,942 DEBUG decos.py Была вызвана функция arg_parser c параметрами () , {}. Вызов из модуля __main__
+2022-08-22 13:08:22,304 INFO client.py Запущен клиент с парамертами: адрес сервера: 127.0.0.1 , порт: 7777, имя пользователя: чебурашка
+2022-08-22 13:08:22,304 DEBUG decos.py Была вызвана функция create_presence c параметрами ('чебурашка',) , {}. Вызов из модуля __main__
+2022-08-22 13:08:22,304 DEBUG client.py Сформировано presence сообщение для пользователя чебурашка
+2022-08-22 13:08:22,304 DEBUG decos.py Была вызвана функция send_message c параметрами (<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('127.0.0.1', 52132), raddr=('127.0.0.1', 7777)>, {'action': 'presence', 'time': 1661162902.3045764, 'user': {'account_name': 'чебурашка'}}) , {}. Вызов из модуля common.utils
+2022-08-22 13:08:22,304 DEBUG decos.py Была вызвана функция get_message c параметрами (<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('127.0.0.1', 52132), raddr=('127.0.0.1', 7777)>,) , {}. Вызов из модуля common.utils
+2022-08-22 13:08:22,806 DEBUG decos.py Была вызвана функция process_response_ans c параметрами ({'response': 200},) , {}. Вызов из модуля __main__
+2022-08-22 13:08:22,807 DEBUG client.py Разбор приветственного сообщения от сервера: {'response': 200}
+2022-08-22 13:08:22,807 INFO client.py Установлено соединение с сервером. Ответ сервера: 200 : OK
+2022-08-22 13:08:22,808 DEBUG decos.py Была вызвана функция get_message c параметрами (<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('127.0.0.1', 52132), raddr=('127.0.0.1', 7777)>,) , {}. Вызов из модуля common.utils
+2022-08-22 13:08:22,808 DEBUG client.py Запущены процессы
+2022-08-22 13:08:51,678 DEBUG client.py Сформирован словарь сообщения: {'action': 'message', 'from': 'чебурашка', 'to': 'чебурашка', 'time': 1661162931.6782398, 'mess_text': 'Hello world!'}
+2022-08-22 13:08:51,680 DEBUG decos.py Была вызвана функция send_message c параметрами (<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('127.0.0.1', 52132), raddr=('127.0.0.1', 7777)>, {'action': 'message', 'from': 'чебурашка', 'to': 'чебурашка', 'time': 1661162931.6782398, 'mess_text': 'Hello world!'}) , {}. Вызов из модуля common.utils
+2022-08-22 13:08:51,680 INFO client.py Отправлено сообщение для пользователя чебурашка
+2022-08-22 13:08:51,842 INFO client.py Получено сообщение от пользователя чебурашка:
+Hello world!
+2022-08-22 13:08:51,842 DEBUG decos.py Была вызвана функция get_message c параметрами (<socket.socket fd=5, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0, laddr=('127.0.0.1', 52132), raddr=('127.0.0.1', 7777)>,) , {}. Вызов из модуля common.utils
+2022-08-22 13:09:22,752 CRITICAL client.py Потеряно соединение с сервером.
