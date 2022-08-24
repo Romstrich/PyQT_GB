@@ -4,5 +4,8 @@
 Его экземпляр добавить в пределах класса серверного сокета. Номер порта передается в экземпляр дескриптора при запуске сервера.
 '''
 
-class Port():
-    pass
+class Port:
+    def __set__(self, instance, value):
+        print('установка порта')
+        print(instance)
+        print(value)
