@@ -9,3 +9,5 @@ class Port:
         print('установка порта')
         print(instance)
         print(value)
+        print(self.name)
+        print(instance.__dict__)
