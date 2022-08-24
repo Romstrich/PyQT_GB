@@ -10,7 +10,7 @@ from errors import IncorrectDataRecivedError
 from common.variables import *
 from common.utils import *
 from decos import log
-# from descrptrs import Port
+from descrptors import Port
 from metaclasses import ServerVerifier
 
 # Инициализация логирования сервера.
