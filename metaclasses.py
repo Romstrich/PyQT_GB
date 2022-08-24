@@ -55,4 +55,29 @@ class ClientVerifier(type):
 
 class ServerVerifier(type):
     def __init__(self, clsname, bases, clsdict):
-        print('Сейчас как проинициализируюсь!')
+        #print('Сейчас как проинициализируюсь!')
+        commands = ('connect')
+        # найденные команды:
+        found_commands = []
+        # проверим функции в методах классса
+        for i in clsdict:
+            try:
+                dis_iter = dis.get_instructions(clsdict[i])
+            except BaseException:
+                # Это нам не интересно
+                # print('Не функция')
+                pass
+            else:
+                # print("шалость удалась")
+                for i in dis_iter:
+                    if i.opname == 'LOAD_GLOBAL':
+                        # print(i.argval)
+                        found_commands.append(i.argval)
+        # print(found_commands)
+        for i in found_commands:
+            if i in commands:
+                # Нашлись неразрешённые команды
+                raise TypeError(f'Метод {i} запрещён к использованию в классе')
+                # print('АХТУНГ')
+            else:
+                pass
