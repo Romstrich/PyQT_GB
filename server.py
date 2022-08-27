@@ -10,7 +10,7 @@ from errors import IncorrectDataRecivedError
 from common.variables import *
 from common.utils import *
 from decos import log
-from descriptors import Port
+from descriptors import Port, ADDR
 from metaclasses import ServerVerifier
 
 # Инициализация логирования сервера.
@@ -31,6 +31,7 @@ def arg_parser():
 # Основной класс сервера
 class Server(metaclass=ServerVerifier):
     port = Port()
+    addr = ADDR()
 
     def __init__(self, listen_address, listen_port):
         # Параментры подключения

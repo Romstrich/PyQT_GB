@@ -4,6 +4,8 @@
 Его экземпляр добавить в пределах класса серверного сокета. Номер порта передается в экземпляр дескриптора при запуске сервера.
 '''
 
+from ipaddress import ip_address
+
 class Port:
     def __set_name__(self, owner, name):
         # print(owner)
@@ -13,9 +15,28 @@ class Port:
 
 
     def __set__(self, instance, value):
-        # print('установка порта')
-        # print(instance)
-        # print(value)
-        # print(self.name)
-        # print(instance.__dict__)
-        instance.__dict__[self.name]=value
+        print('Я работаю')
+        if value < 65535 and value > 1024:
+            instance.__dict__[self.name]=value
+        else:
+            #print('Недопустимый порт')
+            raise ValueError('Недопустимое значение порта')
+            exit(1)
+
+#дескриптор для IP
+class ADDR:
+    def __set_name__(self, owner, name):
+        self.name = name
+        #print('Я работаю')
+
+    def __set__(self, instance, value):
+        try:
+            ip4=ip_address(value)
+        except :
+            raise ValueError('Недопустимое значение адреса')
+            exit(1)
+        else:
+            instance.__dict__[self.name]=value
+
+
+
