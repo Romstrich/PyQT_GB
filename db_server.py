@@ -41,11 +41,13 @@ class ServerStorage:
     # входа;
     # *ip - адрес.
     class LoginHistory:
-        pass
+        def __init__(self):
+            pass
 
     # c) списокконтактов (составляется на основании выборки всех записей с id_владельца):
     # * id_владельца;
     # * id_клиента.'''
 
     class UsersContacts:
-        pass
+        def __init__(self):
+            pass
