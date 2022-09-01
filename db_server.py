@@ -16,11 +16,14 @@ import datetime
 from sqlalchemy import create_engine, MetaData
 
 
+
+
 class ServerStorage:
     # ------------Классы - отображения для связи программы
     # a) клиент:
     # *логин;
     # *информация.
+    #ВСЕ ПОЛЬЗОВАТЕЛИ
     class AllUsers:
         def __init__(self, username):
             self.name = username  # логин пользователя
@@ -40,6 +43,7 @@ class ServerStorage:
     # *время
     # входа;
     # *ip - адрес.
+    #История входа
     class LoginHistory:
         def __init__(self, name, date, ip, port):
             self.name = name  # имя логин
@@ -51,7 +55,7 @@ class ServerStorage:
     # c) списокконтактов (составляется на основании выборки всех записей с id_владельца):
     # * id_владельца;
     # * id_клиента.'''
-
+    #Контакты
     class UsersContacts:
         def __init__(self, user, contact):
             self.id = None
@@ -70,8 +74,18 @@ class ServerStorage:
     # разбор импортов: что к чему
     def __init__(self):
         # подключение движка(драйвера)
-        self.database_engine = create_engine(f'sqlite:///{path}', echo=False, pool_recycle=7200,
-                                             connect_args={'check_same_thread': False})
+        self.database_engine = create_engine('sqlite:///server_base.db3', echo=False, pool_recycle=7200)
         #плывём в метаданные
         self.metadata=MetaData()    #портируем из алхимии
-        
+        # ВСЕ ПОЛЬЗОВАТЕЛИ
+        users_table
+        # Активные пользователи
+        active_users_table
+        # История входа
+        user_login_history
+        # Контакты
+        contacts
+        # ДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЯ-ВЗЯЛ ИЗ ДЗ4 см внимательно
+        users_history_table
+        #Связи классов с таблицами через ОРМ
+
