@@ -14,6 +14,7 @@ c) списокконтактов (составляется на основан�
 # Класс хранилище серверной части
 import datetime
 from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy.orm import mapper, sessionmaker
 
 
 class ServerStorage:
@@ -100,9 +101,9 @@ class ServerStorage:
         # Контакты
         contacts = Table('Contacts', self.metadata,
                          Column('id', Integer, primary_key=True),
-                         Column('user', ForeignKey('Users.id')),#Пользователь к
-                         Column('contact', ForeignKey('Users.id'))#Пользователю
-                         )#так найти кто с кем дружит
+                         Column('user', ForeignKey('Users.id')),  # Пользователь к
+                         Column('contact', ForeignKey('Users.id'))  # Пользователю
+                         )  # так найти кто с кем дружит
         # ДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЯ-ВЗЯЛ ИЗ ДЗ4 см внимательно
         users_history_table = Table('History', self.metadata,
                                     Column('id', Integer, primary_key=True),
@@ -112,5 +113,47 @@ class ServerStorage:
                                     )
         # Связи классов с таблицами через ОРМ
 
-        #cоздание таблиц
+        # cоздание таблиц
         self.metadata.create_all(self.database_engine)
+
+        # Создаём отображения(Объект к таблице)
+        mapper(self.AllUsers, users_table)
+        mapper(self.ActiveUsers, active_users_table)
+        mapper(self.LoginHistory, user_login_history)
+        mapper(self.UsersContacts, contacts)
+        mapper(self.UsersHistory, users_history_table)
+
+        # Создаём сессию
+        Session = sessionmaker(bind=self.database_engine)
+        self.session = Session()
+
+        # Обновление (обнуление таблицы с пользователями (для корректного запуска)
+        self.session.query(self.ActiveUsers).delete()
+        self.session.commit()
+
+    # Функция выполняющяяся при входе пользователя, записывает в базу факт входа
+    def user_login(self, username, ip_address, port):
+        # Запрос в таблицу пользователей на наличие там пользователя с таким именем
+        rez = self.session.query(self.AllUsers).filter_by(name=username)
+
+        # Если имя пользователя уже присутствует в таблице, обновляем время последнего входа
+        if rez.count():
+            user = rez.first()
+            user.last_login = datetime.datetime.now()
+        # Если нету, то создаздаём нового пользователя
+        else:
+            user = self.AllUsers(username)
+            self.session.add(user)
+            # Комит здесь нужен, чтобы присвоился ID
+            self.session.commit()
+            user_in_history = self.UsersHistory(user.id)
+            self.session.add(user_in_history)
+        # Теперь можно создать запись в таблицу активных пользователей о факте входа.
+        new_active_user = self.ActiveUsers(user.id, ip_address, port, datetime.datetime.now())
+        self.session.add(new_active_user)
+        # и сохранить в историю входов
+        history = self.LoginHistory(user.id, datetime.datetime.now(), ip_address, port)
+        self.session.add(history)
+
+        # Сохрраняем изменения
+        self.session.commit()
