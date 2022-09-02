@@ -13,7 +13,7 @@ c) списокконтактов (составляется на основан�
 
 # Класс хранилище серверной части
 import datetime
-from sqlalchemy import create_engine, MetaData,Table,Column
+from sqlalchemy import create_engine, MetaData,Table,Column,Integer,String,DateTime
 
 
 
@@ -79,7 +79,9 @@ class ServerStorage:
         self.metadata=MetaData()    #портируем из алхимии
         # ВСЕ ПОЛЬЗОВАТЕЛИ
         users_table=Table('Users',self.metadata,
-                          Column(),
+                          Column('id', Integer, primary_key=True),#Ключ
+                          Column('name', String, unique=True),#логин
+                          Column('last_login', DateTime)#Последний вход
                           )
         # Активные пользователи
         active_users_table
