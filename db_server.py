@@ -13,9 +13,7 @@ c) списокконтактов (составляется на основан�
 
 # Класс хранилище серверной части
 import datetime
-from sqlalchemy import create_engine, MetaData,Table,Column,Integer,String,DateTime
-
-
+from sqlalchemy import create_engine, MetaData, Table, Column, Integer, String, DateTime, ForeignKey
 
 
 class ServerStorage:
@@ -23,7 +21,7 @@ class ServerStorage:
     # a) клиент:
     # *логин;
     # *информация.
-    #ВСЕ ПОЛЬЗОВАТЕЛИ
+    # ВСЕ ПОЛЬЗОВАТЕЛИ
     class AllUsers:
         def __init__(self, username):
             self.name = username  # логин пользователя
@@ -43,7 +41,7 @@ class ServerStorage:
     # *время
     # входа;
     # *ip - адрес.
-    #История входа
+    # История входа
     class LoginHistory:
         def __init__(self, name, date, ip, port):
             self.name = name  # имя логин
@@ -55,7 +53,7 @@ class ServerStorage:
     # c) списокконтактов (составляется на основании выборки всех записей с id_владельца):
     # * id_владельца;
     # * id_клиента.'''
-    #Контакты
+    # Контакты
     class UsersContacts:
         def __init__(self, user, contact):
             self.id = None
@@ -75,21 +73,44 @@ class ServerStorage:
     def __init__(self):
         # подключение движка(драйвера)
         self.database_engine = create_engine('sqlite:///server_base.db3', echo=False, pool_recycle=7200)
-        #плывём в метаданные
-        self.metadata=MetaData()    #портируем из алхимии
+        # плывём в метаданные
+        self.metadata = MetaData()  # портируем из алхимии
         # ВСЕ ПОЛЬЗОВАТЕЛИ
-        users_table=Table('Users',self.metadata,
-                          Column('id', Integer, primary_key=True),#Ключ
-                          Column('name', String, unique=True),#логин
-                          Column('last_login', DateTime)#Последний вход
-                          )
+        users_table = Table('Users', self.metadata,
+                            Column('id', Integer, primary_key=True),  # Ключ
+                            Column('name', String, unique=True),  # логин
+                            Column('last_login', DateTime)  # Последний вход
+                            )
         # Активные пользователи
-        active_users_table
+        active_users_table = Table('Active_users', self.metadata,
+                                   Column('id', Integer, primary_key=True),  # Ключ
+                                   Column('user', ForeignKey('Users.id'), unique=True),  # Ключ из таблицы пользователей
+                                   Column('ip_address', String),  # IP
+                                   Column('port', Integer),  # Порт за пользователем
+                                   Column('login_time', DateTime)  # Время входа
+                                   )
         # История входа
-        user_login_history
+        user_login_history = Table('Login_history', self.metadata,
+                                   Column('id', Integer, primary_key=True),
+                                   Column('name', ForeignKey('Users.id')),
+                                   Column('date_time', DateTime),
+                                   Column('ip', String),
+                                   Column('port', String)
+                                   )
         # Контакты
-        contacts
+        contacts = Table('Contacts', self.metadata,
+                         Column('id', Integer, primary_key=True),
+                         Column('user', ForeignKey('Users.id')),#Пользователь к
+                         Column('contact', ForeignKey('Users.id'))#Пользователю
+                         )#так найти кто с кем дружит
         # ДЕЙСТВИЯ ПОЛЬЗОВАТЕЛЯ-ВЗЯЛ ИЗ ДЗ4 см внимательно
-        users_history_table
-        #Связи классов с таблицами через ОРМ
+        users_history_table = Table('History', self.metadata,
+                                    Column('id', Integer, primary_key=True),
+                                    Column('user', ForeignKey('Users.id')),
+                                    Column('sent', Integer),
+                                    Column('accepted', Integer)
+                                    )
+        # Связи классов с таблицами через ОРМ
 
+        #cоздание таблиц
+        self.metadata.create_all(self.database_engine)
