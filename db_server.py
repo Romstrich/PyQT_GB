@@ -26,7 +26,7 @@ class ServerStorage:
     class AllUsers:
         def __init__(self, username):
             self.name = username  # логин пользователя
-            self.last_login = datetime.datatime.now()  # вводим дату входа
+            self.last_login = datetime.datetime.now()  # вводим дату входа
             self.id = None  # None означает, что ключ в настоящее время не определён
 
     # Активные пользователи (пригодится для работы)
@@ -157,3 +157,136 @@ class ServerStorage:
 
         # Сохрраняем изменения
         self.session.commit()
+
+    # Функция фиксирующая отключение пользователя
+    def user_logout(self, username):
+        # Запрашиваем пользователя, что покидает нас
+        user = self.session.query(self.AllUsers).filter_by(name=username).first()
+
+        # Удаляем его из таблицы активных пользователей.
+        self.session.query(self.ActiveUsers).filter_by(user=user.id).delete()
+
+        # Применяем изменения
+        self.session.commit()
+
+ # Функция фиксирует передачу сообщения и делает соответствующие отметки в БД
+    def process_message(self, sender, recipient):
+        # Получаем ID отправителя и получателя
+        sender = self.session.query(self.AllUsers).filter_by(name=sender).first().id
+        recipient = self.session.query(self.AllUsers).filter_by(name=recipient).first().id
+        # Запрашиваем строки из истории и увеличиваем счётчики
+        sender_row = self.session.query(self.UsersHistory).filter_by(user=sender).first()
+        sender_row.sent += 1
+        recipient_row = self.session.query(self.UsersHistory).filter_by(user=recipient).first()
+        recipient_row.accepted += 1
+
+        self.session.commit()#add_new
+
+    # Функция добавляет контакт для пользователя.
+    def add_contact(self, user, contact):
+        # Получаем ID пользователей
+        user = self.session.query(self.AllUsers).filter_by(name=user).first()
+        contact = self.session.query(self.AllUsers).filter_by(name=contact).first()
+
+        # Проверяем что не дубль и что контакт может существовать (полю пользователь мы доверяем)
+        if not contact or self.session.query(self.UsersContacts).filter_by(user=user.id, contact=contact.id).count():
+            return
+
+        # Создаём объект и заносим его в базу
+        contact_row = self.UsersContacts(user.id, contact.id)
+        self.session.add(contact_row)
+        self.session.commit()#add_new
+
+    # Функция удаляет контакт из базы данных
+    def remove_contact(self, user, contact):
+        # Получаем ID пользователей
+        user = self.session.query(self.AllUsers).filter_by(name=user).first()
+        contact = self.session.query(self.AllUsers).filter_by(name=contact).first()
+
+        # Проверяем что контакт может существовать (полю пользователь мы доверяем)
+        if not contact:
+            return
+
+        # Удаляем требуемое
+        print(self.session.query(self.UsersContacts).filter(
+            self.UsersContacts.user == user.id,
+            self.UsersContacts.contact == contact.id
+        ).delete())
+        self.session.commit()#add_new
+
+    # Функция возвращает список известных пользователей со временем последнего входа.
+    def users_list(self):
+        # Запрос строк таблицы пользователей.
+        query = self.session.query(
+            self.AllUsers.name,
+            self.AllUsers.last_login
+        )
+        # Возвращаем список кортежей
+        return query.all()
+
+    # Функция возвращает список активных пользователей
+    def active_users_list(self):
+        # Запрашиваем соединение таблиц и собираем кортежи имя, адрес, порт, время.
+        query = self.session.query(
+            self.AllUsers.name,
+            self.ActiveUsers.ip_address,
+            self.ActiveUsers.port,
+            self.ActiveUsers.login_time
+        ).join(self.AllUsers)
+        # Возвращаем список кортежей
+        return query.all()
+
+    # Функция возвращающаяя историю входов по пользователю или всем пользователям
+    def login_history(self, username=None):
+        # Запрашиваем историю входа
+        query = self.session.query(self.AllUsers.name,
+                                   self.LoginHistory.date_time,
+                                   self.LoginHistory.ip,
+                                   self.LoginHistory.port
+                                   ).join(self.AllUsers)
+        # Если было указано имя пользователя, то фильтруем по нему
+        if username:
+            query = query.filter(self.AllUsers.name == username)
+        # Возвращаем список кортежей
+        return query.all()
+
+    # Функция возвращает список контактов пользователя.
+    def get_contacts(self, username):
+        # Запрашивааем указанного пользователя
+        user = self.session.query(self.AllUsers).filter_by(name=username).one()
+
+        # Запрашиваем его список контактов
+        query = self.session.query(self.UsersContacts, self.AllUsers.name). \
+            filter_by(user=user.id). \
+            join(self.AllUsers, self.UsersContacts.contact == self.AllUsers.id)
+
+        # выбираем только имена пользователей и возвращаем их.
+        return [contact[1] for contact in query.all()]#add_new
+
+    # Функция возвращает количество переданных и полученных сообщений
+    def message_history(self):#add_new
+        query = self.session.query(
+            self.AllUsers.name,
+            self.AllUsers.last_login,
+            self.UsersHistory.sent,
+            self.UsersHistory.accepted
+        ).join(self.AllUsers)
+        # Возвращаем список кортежей
+        return query.all()
+
+
+# Отладка
+if __name__ == '__main__':
+    test_db = ServerStorage()
+    test_db.user_login('1111', '192.168.1.113', 8080)
+    test_db.user_login('McG2', '192.168.1.113', 8081)
+    print(test_db.users_list())
+    # print(test_db.active_users_list())
+    # test_db.user_logout('McG')
+    # print(test_db.login_history('re'))
+    # test_db.add_contact('test2', 'test1')
+    # test_db.add_contact('test1', 'test3')
+    # test_db.add_contact('test1', 'test6')
+    # test_db.remove_contact('test1', 'test3')
+    test_db.process_message('McG2', '1111')
+    print(test_db.message_history())
