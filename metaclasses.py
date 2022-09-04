@@ -1,83 +1,63 @@
-'''
-1. Реализовать метакласс ClientVerifier, выполняющий базовую проверку класса «Клиент» (для некоторых проверок уместно использовать модуль dis):
-отсутствие вызовов accept и listen для сокетов;
-использование сокетов для работы по TCP;
-отсутствие создания сокетов на уровне классов, то есть отсутствие конструкций такого вида: class Client: s = socket() ...
-'''
-'''
-dis.get_instructions(x, *, first_line=None)¶
-Возвращает итератор по инструкциям в предоставленной функции, методу, исходному коду строки или объекту кода.
-Итератор производит последовательность Instruction именованных кортежей, предоставляющих подробную информацию о каждой операции в предоставляемом коде.
-Если first_line не является None, он указывает номер строки, которая должна быть указана для первой исходной строки в дизассемблированном коде. В проти
-вном случае информация об исходной строке (при ее наличии) берется непосредственно из дизассемблированного объекта кода.
-'''
-import dis,tabulate
+import dis
 
-class ClientVerifier(type):
-    '''Выполняем проверку при создании
-        по этому используем перегрузку init'''
-    def __init__(self, clsname, bases, clsdict):
-        #print('Сейчас как проинициализируюсь!')
-        #print(f'{clsname}\n{clsdict},\n{bases}')
-        # интересующие нас команды, инструкции которых не должно быть:
-        commands=('accept', 'listen', 'socket')
-        #найденные команды:
-        found_commands=[]
-        #проверим функции в методах классса
-        for i in clsdict:
+
+# Метакласс для проверки соответствия сервера:
+class ServerMaker(type):
+    def __init__(cls, clsname, bases, clsdict):
+        # Список методов, которые используются в функциях класса:
+        methods = []
+        # Атрибуты, вызываемые функциями классов
+        attrs = []
+        for func in clsdict:
+            # Пробуем
             try:
-                dis_iter=dis.get_instructions(clsdict[i])
-            except BaseException:
-                #Это нам не интересно
-                #print('Не функция')
+                ret = dis.get_instructions(clsdict[func])
+                # Если не функция то ловим исключение
+            except TypeError:
                 pass
             else:
-                #print("шалость удалась")
-                for i in dis_iter:
+                # Раз функция разбираем код, получая используемые методы и атрибуты.
+                for i in ret:
                     if i.opname == 'LOAD_GLOBAL':
-                        #print(i.argval)
-                        found_commands.append(i.argval)
-        #print(found_commands)
-        for i in found_commands:
-            if i in commands:
-                #Нашлись неразрешённые команды
-                raise TypeError(f'Метод {i} запрещён к использованию в классе')
-                #print('АХТУНГ')
-            else:
-                pass
+                        if i.argval not in methods:
+                            methods.append(i.argval)
+                    elif i.opname == 'LOAD_ATTR':
+                        if i.argval not in attrs:
+                            attrs.append(i.argval)
+        # Если обнаружено использование недопустимого метода connect, бросаем исключение:
+        if 'connect' in methods:
+            raise TypeError('Использование метода connect недопустимо в серверном классе')
+        # Если сокет не инициализировался константами SOCK_STREAM(TCP) AF_INET(IPv4), тоже исключение.
+        if not ('SOCK_STREAM' in attrs and 'AF_INET' in attrs):
+            raise TypeError('Некорректная инициализация сокета.')
+        super().__init__(clsname, bases, clsdict)
 
 
-'''
-2. Реализовать метакласс ServerVerifier, выполняющий базовую проверку класса «Сервер»:
-отсутствие вызовов connect для сокетов;
-использование сокетов для работы по TCP. ###
-'''
-
-class ServerVerifier(type):
-    def __init__(self, clsname, bases, clsdict):
-        #print('Сейчас как проинициализируюсь!')
-        commands = ('connect')
-        # найденные команды:
-        found_commands = []
-        # проверим функции в методах классса
-        for i in clsdict:
+# Метакласс для проверки корректности клиентов:
+class ClientMaker(type):
+    def __init__(cls, clsname, bases, clsdict):
+        # Список методов, которые используются в функциях класса:
+        methods = []
+        for func in clsdict:
+            # Пробуем
             try:
-                dis_iter = dis.get_instructions(clsdict[i])
-            except BaseException:
-                # Это нам не интересно
-                # print('Не функция')
+                ret = dis.get_instructions(clsdict[func])
+                # Если не функция то ловим исключение
+            except TypeError:
                 pass
             else:
-                # print("шалость удалась")
-                for i in dis_iter:
+                # Раз функция разбираем код, получая используемые методы.
+                for i in ret:
                     if i.opname == 'LOAD_GLOBAL':
-                        # print(i.argval)
-                        found_commands.append(i.argval)
-        # print(found_commands)
-        for i in found_commands:
-            if i in commands:
-                # Нашлись неразрешённые команды
-                raise TypeError(f'Метод {i} запрещён к использованию в классе')
-                # print('АХТУНГ')
-            else:
-                pass
+                        if i.argval not in methods:
+                            methods.append(i.argval)
+        # Если обнаружено использование недопустимого метода accept, listen, socket бросаем исключение:
+        for command in ('accept', 'listen', 'socket'):
+            if command in methods:
+                raise TypeError('В классе обнаружено использование запрещённого метода')
+        # Вызов get_message или send_message из utils считаем корректным использованием сокетов
+        if 'get_message' in methods or 'send_message' in methods:
+            pass
+        else:
+            raise TypeError('Отсутствуют вызовы функций, работающих с сокетами.')
+        super().__init__(clsname, bases, clsdict)
