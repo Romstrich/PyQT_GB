@@ -32,14 +32,14 @@ class ServerStorage:
             self.port = port
 
     # Класс - отображение таблицы контактов пользователей
-    class UsersContacts:#add_new
+    class UsersContacts:
         def __init__(self, user, contact):
             self.id = None
             self.user = user
             self.contact = contact
 
     # Класс отображение таблицы истории действий
-    class UsersHistory:#add_new
+    class UsersHistory:
         def __init__(self, user):
             self.id = None
             self.user = user
@@ -47,8 +47,7 @@ class ServerStorage:
             self.accepted = 0
 
     def __init__(self , path):
-        # Создаём движок базы данных Традиционный подох
-        print(path)
+        # Создаём движок базы данных
         self.database_engine = create_engine(f'sqlite:///{path}', echo=False, pool_recycle=7200,
                                              connect_args={'check_same_thread': False})
 
@@ -80,14 +79,14 @@ class ServerStorage:
                                    Column('port', String)
                                    )
 
-        # Создаём таблицу контактов пользователей add_new
+        # Создаём таблицу контактов пользователей
         contacts = Table('Contacts', self.metadata,
                          Column('id', Integer, primary_key=True),
                          Column('user', ForeignKey('Users.id')),
                          Column('contact', ForeignKey('Users.id'))
                          )
 
-        # Создаём таблицу истории пользователей add_new
+        # Создаём таблицу истории пользователей
         users_history_table = Table('History', self.metadata,
                                     Column('id', Integer, primary_key=True),
                                     Column('user', ForeignKey('Users.id')),
@@ -164,7 +163,7 @@ class ServerStorage:
         recipient_row = self.session.query(self.UsersHistory).filter_by(user=recipient).first()
         recipient_row.accepted += 1
 
-        self.session.commit()#add_new
+        self.session.commit()
 
     # Функция добавляет контакт для пользователя.
     def add_contact(self, user, contact):
@@ -179,7 +178,7 @@ class ServerStorage:
         # Создаём объект и заносим его в базу
         contact_row = self.UsersContacts(user.id, contact.id)
         self.session.add(contact_row)
-        self.session.commit()#add_new
+        self.session.commit()
 
     # Функция удаляет контакт из базы данных
     def remove_contact(self, user, contact):
@@ -192,11 +191,11 @@ class ServerStorage:
             return
 
         # Удаляем требуемое
-        print(self.session.query(self.UsersContacts).filter(
+        self.session.query(self.UsersContacts).filter(
             self.UsersContacts.user == user.id,
             self.UsersContacts.contact == contact.id
-        ).delete())
-        self.session.commit()#add_new
+        ).delete()
+        self.session.commit()
 
     # Функция возвращает список известных пользователей со временем последнего входа.
     def users_list(self):
@@ -245,10 +244,10 @@ class ServerStorage:
             join(self.AllUsers, self.UsersContacts.contact == self.AllUsers.id)
 
         # выбираем только имена пользователей и возвращаем их.
-        return [contact[1] for contact in query.all()]#add_new
+        return [contact[1] for contact in query.all()]
 
     # Функция возвращает количество переданных и полученных сообщений
-    def message_history(self):#add_new
+    def message_history(self):
         query = self.session.query(
             self.AllUsers.name,
             self.AllUsers.last_login,
