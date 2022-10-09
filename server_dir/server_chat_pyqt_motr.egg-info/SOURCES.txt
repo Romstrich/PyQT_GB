@@ -1,0 +1,13 @@
+setup.py
+serv/__init__.py
+serv/add_user.py
+serv/config_window.py
+serv/core.py
+serv/database.py
+serv/main_window.py
+serv/remove_user.py
+serv/stat_window.py
+server_chat_pyqt_motr.egg-info/PKG-INFO
+server_chat_pyqt_motr.egg-info/SOURCES.txt
+server_chat_pyqt_motr.egg-info/dependency_links.txt
+server_chat_pyqt_motr.egg-info/top_level.txt
